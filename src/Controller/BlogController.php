@@ -8,8 +8,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType; //utilisé pour la clas
 use Symfony\Component\Form\Extension\Core\Type\SubmitType; // utilisé pour l'appel de la classe de la soumission du formulaire
 use App\Entity\Article; // pour lui indiquer d'utiliser la class article
 use App\Repository\ArticleRepository; //pour lui indiquer d'utiliser la class ArticleRepository
+
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface; //pour function create
+
+use App\Form\ArticleType; //appel de la classe article type pour function form L45
 
 
 class BlogController extends AbstractController
@@ -43,18 +46,16 @@ class BlogController extends AbstractController
 
         if(!$article){ //si $article n'existe pas on le crée
             $article= new Article();
+            
         }
         
-
-        $article->setTitle("ceci est le titre de l'article");
-        $article->setContent("Ceci est le contenu de l'article");
-
-
-        $form = $this->createFormBuilder($article)
+        /* $form = $this->createFormBuilder($article)
                 ->add('title')
                 ->add('content')
                 ->add('image')
-                ->getForm();
+                ->getForm(); */
+
+        $form = $this->createForm(ArticleType::class, $article);
 
         $form->handleRequest($request);
 
@@ -71,7 +72,8 @@ class BlogController extends AbstractController
             return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
         };
         return $this->render("blog/create.html.twig", [
-            'formArticle'   => $form->createView()
+            'formArticle'   => $form->createView(),
+            'editMode'      => $article->getId() !== null //si !==null = true donc on est en editmode
         ]);
     }
 
